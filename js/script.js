@@ -11,8 +11,16 @@ searchForm.addEventListener('submit', (e) => {
 });
 
 mainSection.addEventListener('click', (e) => {
-    if (e.target.classList.contains('movie__watchlist-button')) {
-        const imdbID = e.target.dataset.name;
+    let target = e.target;
+
+    // Traverse up the DOM to find the button element
+    while (target && !target.classList.contains('movie__watchlist-button')) {
+        target = target.parentElement;
+    }
+
+    if (target && target.classList.contains('movie__watchlist-button')) {
+        const imdbID = target.dataset.name;
+        target.setAttribute('disabled', ''); // Disable button to avoid multiple clicks
         addToWatchList(imdbID);
     }
 });
@@ -23,13 +31,24 @@ function addToWatchList(imdbID) {
         .then(data => {
             if (!watchList.some(movie => movie.imdbID === imdbID)) {
                 watchList.push(data);
-                localStorage.setItem("watchList", JSON.stringify(watchList));
-                document.querySelector(`button[data-name='${imdbID}']`).innerHTML = `
-                    <p class="movie-data"><span style="color: #08a32a; font-weight: 500;">&#10003 Added</span></p>
-                `;
-                document.querySelector(`button[data-name='${imdbID}']`).setAttribute('disabled', '');
+                localStorage.setItem('watchList', JSON.stringify(watchList));
+                updateButtonState(imdbID, true);
+            } else {
+                updateButtonState(imdbID, false);
             }
-        });
+        }).catch(err => {
+        console.error('Failed to add to watchlist:', err);
+    });
+}
+
+function updateButtonState(imdbID, added) {
+    const button = document.querySelector(`button[data-name='${imdbID}']`);
+    if (added) {
+        button.innerHTML = `<p class="movie-data"><span style="color: #08a32a; font-weight: 500;">&#10003 Added</span></p>`;
+        button.setAttribute('disabled', '');
+    } else {
+        button.removeAttribute('disabled');
+    }
 }
 
 function getMovieID(movieInput) {
@@ -44,9 +63,7 @@ function getMovieID(movieInput) {
                 }
                 fetchMovieDetails();
             } else {
-                mainSection.innerHTML = `
-                    <h2 class="heading-secondary">Unable to find what you’re looking for. Please try another search.</h2>
-                `;
+                mainSection.innerHTML = `<h2 class="heading-secondary">Unable to find what you’re looking for. Please try another search.</h2>`;
             }
         });
 }
@@ -82,19 +99,16 @@ function fetchMovieDetails() {
                         <hr>
                     `;
 
-                    for (let added of watchList) {
-                        if (added.imdbID === data.imdbID) {
-                            document.querySelector(`button[data-name='${data.imdbID}']`).setAttribute('disabled', '');
-                            document.querySelector(`button[data-name='${data.imdbID}']`).innerHTML = `
-                                <p class="movie-data"><span style="color: #08a32a; font-weight: 500;">&#10003 Added</span></p>
-                            `;
-                        }
+                    if (watchList.some(movie => movie.imdbID === data.imdbID)) {
+                        updateButtonState(data.imdbID, true);
                     }
                 }
-            });
+            }).catch(err => {
+            console.error('Failed to fetch movie details:', err);
+        });
     }
 }
-// Render color based on rating to data.imbdRating
+
 function setRatingColor(rating) {
     if (rating >= 8) {
         return '#08a32a';
