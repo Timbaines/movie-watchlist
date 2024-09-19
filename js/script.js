@@ -11,16 +11,11 @@ searchForm.addEventListener('submit', (e) => {
 });
 
 mainSection.addEventListener('click', (e) => {
-    let target = e.target;
+    const target = e.target.closest('.movie__watchlist-button');
 
-    // Traverse up the DOM to find the button element
-    while (target && !target.classList.contains('movie__watchlist-button')) {
-        target = target.parentElement;
-    }
-
-    if (target && target.classList.contains('movie__watchlist-button')) {
+    if (target) {
         const imdbID = target.dataset.name;
-        target.setAttribute('disabled', ''); // Disable button to avoid multiple clicks
+        target.setAttribute('disabled', '');
         addToWatchList(imdbID);
     }
 });
