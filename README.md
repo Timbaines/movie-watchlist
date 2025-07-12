@@ -5,3 +5,6 @@ An app that allows users to seamlessly search and explore films using the IMDb D
 
 ### Features
 The app includes a dynamic color-coding system for movie ratings, making it easier to visually interpret the quality of each movie at a glance. The color is set based on the IMDb rating of the movie
+
+### Credits
+![Scrimba](https://img.shields.io/badge/scrimba-2B283A?style=for-the-badge&logo=scrimba&logoColor=white)
